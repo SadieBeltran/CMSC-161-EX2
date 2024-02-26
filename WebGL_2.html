@@ -93,7 +93,7 @@
 
 
       // Declaration of pointers to the attributes
-      const aPositionPointer = gl.getAttribLocation(program, 'a_position');
+      const aPositionPointer = gl.getAttribLocation(program, 'a_position'); //a_position is the pointer to the vertex-shader
       const aPointSizePointer = gl.getAttribLocation(program, 'a_point_size');
 
       var colorLocation = gl.getUniformLocation(program, "u_color"); //u_color is tied with our fragment shader. Pointer pa lang cya
@@ -115,19 +115,25 @@
       gl.bindBuffer(gl.ARRAY_BUFFER,shapeBuffer);
       
       //Write data into the buffer object
+      //gl.STATIC_DRAW once stated, but regularly gets data
       gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(square_vertices),gl.STATIC_DRAW);
       
       //Assign the buffer object to an attribute variable
+      //the params we're supplying is the location, size, type, if normalized/not normalized, stride, offset
+      //normalized - kung ung data ay hindi nakaset sa specific range of values
+      //stride and offset - ung way ng pagaccess ng vars
       gl.vertexAttribPointer(aPositionPointer,4,gl.FLOAT,false,0,0);
       
       //Enable assignment
+      //binibigay na sa shader program ung nadeclare na values. Ung buffer obj ung magsusupply ng data and stuff
       gl.enableVertexAttribArray(aPositionPointer);
 
       // draw buffer that is bound to gl.ARRAY_BUFFER
       gl.uniform4f(colorLocation,1.0,0.5,0.0,1.0); //pointer and RGBA value color location is tied up with our fragment shader using our uniform4F method
-      gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
+      gl.drawArrays(gl.TRIANGLES, 0, 4);
 
       //unbind the buffer
+      //NEEDED ESPECIALLY WHEN YOU'RE DRAWING SEVERAL OBJS
       gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
 }
