@@ -1,0 +1,138 @@
+<!doctype html>
+<html>
+<head>
+  <title>WebGL Demo</title>
+</head>
+
+<body>
+  <canvas id="output" width="1048" height="1048"></canvas>
+
+  <!-- VERTEX SHADER -->
+  <script id="vertex-shader" type="notjs">#version 300 es
+    in vec4 a_position;
+    in float a_point_size;
+
+    void main() {
+      gl_Position = a_position;
+      gl_PointSize = a_point_size;
+    } 
+  </script>
+
+  <!-- FRAGMENT SHADER -->
+  <script id="fragment-shader" type="notjs">#version 300 es
+    precision mediump float;
+
+    uniform vec4 u_color;
+    out vec4 outColor;
+
+    void main(void) {
+      //outColor = vec4(1, 0, 0, 1); //red
+    
+      outColor = u_color;
+    }
+
+    
+  </script>
+
+  <!-- Function for creating and compiling shader programs -->
+  <script>
+  function createShader (gl, type, sourceCode) {
+  // Compiles either a shader of type gl.VERTEX_SHADER or gl.FRAGMENT_SHADER
+  var shader = gl.createShader( type );
+  gl.shaderSource( shader, sourceCode );
+  gl.compileShader( shader );
+
+  if ( !gl.getShaderParameter(shader, gl.COMPILE_STATUS) ) {
+    var info = gl.getShaderInfoLog( shader );
+    throw 'Could not compile WebGL program. \n\n' + info;
+  }
+  return shader;
+}
+</script>
+  
+  <!-- Main function contains: 
+    1) declaration of WebGL context
+    2) function calls to initialize the shader programs
+    3) declaration and binding of buffer object
+    4) draw functions
+  -->
+  <script> 
+    function main() {
+      const canvas = document.querySelector('#output');
+      if(!canvas){
+        console.log("Canvas element with specified ID ('output') cannot be found.");
+      }
+//const gl = initWebGL(canvas, true);
+      //Setting up the WebGL Context
+      const gl = canvas.getContext('webgl2');
+      const vertexShaderSource = document.querySelector('#vertex-shader').text;
+      const fragmentShaderSource = document.querySelector('#fragment-shader').text;
+      const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
+      const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
+      
+      //Creation and initialization of GL program 
+      var program = gl.createProgram();
+
+      // Attach pre-existing shaders
+      gl.attachShader(program, vertexShader);
+      gl.attachShader(program, fragmentShader);
+
+      gl.linkProgram(program);
+
+      if ( !gl.getProgramParameter( program, gl.LINK_STATUS) ) {
+        var info = gl.getProgramInfoLog(program);
+        throw 'Could not compile WebGL program. \n\n' + info;
+      }
+
+      // set the program created earlier
+      gl.useProgram(program);
+
+      // clear the screen before drawing anything
+      gl.clearColor(0.0, 0.0, 0.0, 1.0); // black - RGBA
+      gl.clear(gl.COLOR_BUFFER_BIT); //execute
+
+
+      // Declaration of pointers to the attributes
+      const aPositionPointer = gl.getAttribLocation(program, 'a_position');
+      const aPointSizePointer = gl.getAttribLocation(program, 'a_point_size');
+
+      var colorLocation = gl.getUniformLocation(program, "u_color"); //u_color is tied with our fragment shader. Pointer pa lang cya
+
+      var square_vertices = [
+      -0.25,-0.25, 0, 1.0, //vertex 1
+      -0.25, 0.25, 0, 1.0, //vertex 2
+       0.25, 0.25, 0.0, 1.0, //vertex 3
+       0.25,-0.25, 0.0, 1.0  //vertex 4
+      ];
+
+
+      //Buffer object to be accessed by gl.ARRAY_BUFFER
+
+      //create a buffer object
+      var shapeBuffer = gl.createBuffer();
+
+      //Bind buffer object to a target
+      gl.bindBuffer(gl.ARRAY_BUFFER,shapeBuffer);
+      
+      //Write data into the buffer object
+      gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(square_vertices),gl.STATIC_DRAW);
+      
+      //Assign the buffer object to an attribute variable
+      gl.vertexAttribPointer(aPositionPointer,4,gl.FLOAT,false,0,0);
+      
+      //Enable assignment
+      gl.enableVertexAttribArray(aPositionPointer);
+
+      // draw buffer that is bound to gl.ARRAY_BUFFER
+      gl.uniform4f(colorLocation,1.0,0.5,0.0,1.0); //pointer and RGBA value color location is tied up with our fragment shader using our uniform4F method
+      gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
+
+      //unbind the buffer
+      gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+}
+    // call the main program
+    main();
+  </script>
+</body>
+</html>
