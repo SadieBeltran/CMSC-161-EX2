@@ -20,8 +20,8 @@ j = 0
 # increment by 10 so there's fewer points
 for i in range(0, indices_len, 10): 
     # write the x and y coordinates into their respective files (to make copy pasting easier)
-    fx.write(str(round(indices[0][i]/w,2))+ ",")
-    fy.write(str(round(indices[1][i]/h,2))+ ",")
+    fx.write(str(round((indices[1][i]/w)-0.5,2))+ ","+ str(round((indices[0][i]/h)-0.5,2))+"\n")
+    # fy.write(str(round(indices[1][i]/h,2))+ ",")
     j+=1
 print(j) 
 
